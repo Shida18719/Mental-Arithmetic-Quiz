@@ -64,7 +64,7 @@ window.addEventListener('DOMContentLoaded', () => {
             ruleBox.style.display = "none";
 
         // if username input is less than 8 characters 
-        } else if (playerName.length >= 8) {
+        } else if (playerName.length > 8) {
             errorTxt = "Username must have maximum of 8 characters";
         } 
         // if errorMsg is not empty
@@ -73,7 +73,7 @@ window.addEventListener('DOMContentLoaded', () => {
             // display error message in the errorMsg div on home page
             errorMsg.innerHTML = errorTxt;
         } else{ 
-            userNameInput.innerHTML = "";
+            userNameInput.value = "";
             localStorage.setItem("player", playerName);
             startQuiz.classList.add('hide');
             ruleBox.style.display = "block";
@@ -120,7 +120,7 @@ level1.addEventListener("click", function(){
      levelTitle.innerHTML = "Level 1"; 
  
      questionStart();
-     interval = setInterval(countTime, 1000); 
+     startTimer();
     
 });
  
@@ -131,7 +131,8 @@ level2.addEventListener("click", function(){
      levelTitle.innerHTML = "Level 2";
  
      questionStart();
-     interval = setInterval(countTime, 1000);
+     startTimer();
+
 });
 
 
@@ -142,7 +143,8 @@ level3.addEventListener("click", function(){
      levelTitle.innerHTML = "Level 3";
  
      questionStart();
-     interval = setInterval(countTime, 1000);
+     startTimer();
+
 });
 
 });   
@@ -150,24 +152,35 @@ level3.addEventListener("click", function(){
 
 // Set the next question
 nextQueBtn.addEventListener("click", function() {
-    setInterval(countTime, 1000)
+    clearInterval(interval);
+    timer = 15;
+
+    startTimer();
     nextQuestion(); 
 });
 
 
 //  Set function for time counter     
-let timer = 0;
-let interval = 0; 
+let timer = 15;
+let interval;
 
-let countTime = ()=> {
-    if (timer === 20) {
-        clearInterval(interval);
-        nextQueBtn.click();  
-        timeCounter.innerText = 0    
-    } else {
-        timer++;
+
+const startTimer = (timer) => {
+    clearInterval(interval);
+    timer = 15;
+    timeCounter.innerText = timer;
+
+    interval =setInterval(() => {
+        timer--;
         timeCounter.innerText = timer;
-    } 
+
+        if (timer <= 0) {
+            clearInterval(interval);
+            nextQueBtn.click();  
+        } 
+
+    }, 1000);
+    
 };
 
 // Set the variables for user score, question number and all questions in the array
@@ -213,7 +226,7 @@ function renderQuestions() {
     option1.innerHTML = allQuestions[questionNum].options[0];
     option2.innerHTML = allQuestions[questionNum].options[1];
     option3.innerHTML = allQuestions[questionNum].options[2];
-    option4.innerHTML = allQuestions[questionNum].options[3];  
+    option4.innerHTML = allQuestions[questionNum].options[3];
     
 }
 
@@ -234,6 +247,7 @@ function enableOptions(){
 
 // Function to check if user answer is coreect, option button changes to green and vice visa and increases score.
 function optionClick(userAnswer) {
+    clearInterval(interval);
     
     if(userAnswer == allQuestions[questionNum].answer) {
         ++userScored;
@@ -270,6 +284,7 @@ function checkAnswers(answerId) {
 * then swap the Next Question button with Result 
 */
 function nextQuestion() {
+    clearInterval(interval);
     questionNum+=1;
     
      if(questionNum == 5){
@@ -296,8 +311,9 @@ function nextQuestion() {
             option3.style.backgroundColor = "#3f13a4";
             option4.style.backgroundColor = "#3f13a4";
         
-            // Start timer
-            timer = 0;  
+            // Reset timer for next question
+            startTimer();
+
      }    
 }
 
@@ -312,13 +328,13 @@ resultBtn.addEventListener("click", () =>{
 
 /**
   * Function to randomly display quiz with level of difficulty
-*  using the Math.random() to Swap an item with another
+  *  using the Math.random() to Swap an item with another
  */
 function shuffle(questionsArray) {
     //Code from jsfiddle.net/gautamz07/zotsc64e/
     let currentQuestionIndex = questionsArray.length,  randomise;
 
-    // The conditional statement to shuffle the remaininig questions.
+    // The conditional statement to shuffle the remaining questions.
     while (currentQuestionIndex != 0) {
 
         // Pick from the remaining questions.
